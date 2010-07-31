@@ -1,0 +1,15 @@
+{% load event_tags %}
+<h1>Vergangene Einladungen</h1>
+ <div class="clearfix">
+     {% if old_invitations %}
+        {% for event in old_invitations %}
+            {% if in_profile %}
+                {% event_profile_preview event user %}
+            {% else %}
+                {% event_small_preview event user %}
+            {% endif %}
+        {% endfor %}
+     {% else %}
+         <p>Keine Einladung gefunden.</p>
+     {% endif %}
+ </div>

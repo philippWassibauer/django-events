@@ -1,0 +1,26 @@
+{% load truncchar_tag %}
+{% if event.eventimage %}
+   <div style="float:left;">
+      <a href="{{event.get_absolute_url}}" class="profile-signature-image">
+         <img src="{{ event.eventimage.get_48_48_url }}" alt="{{ event }}" height="48px" width="48px"/>
+      </a>
+   </div>
+{% endif %}
+<div class="small-preview-links">
+   <a href="{{event.get_absolute_url}}" title="{{event}}" class="profile-signature-link">
+       {{event|truncchar:18}}
+   </a><br />
+   <div style="margin-top: 2px;">
+      {% if event.location %}
+         <b>Wo?</b> <a href="{{event.location.get_absolute_url}}">{{event.location}}</a>     <br />
+      {% else %}
+         {% if event.location_name or event.location_adress %}
+             <b>Wo?</b>
+             {% if event.location_name %}{{event.location_name}}{% else %}{{event.location_adress}}{% endif %}<br />
+         {% endif %}
+      {% endif %}
+      <b>Wann? {{event.start_date|date:"l, d. m,"}} {{event.start_date|time}}</b>
+   </div>
+</div>
+
+<div style="clear: both;"></div>

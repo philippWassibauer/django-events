@@ -1,0 +1,73 @@
+{% load recommendation_tags %}
+{% load addthis_tag %}
+<div class="main-list-item {% if event.ends_today %}event-current-day{% endif %}">
+    {% if event.is_invitation %}
+        {% if not event.has_free_invites %}
+            <div class="vergeben-band"></div>
+        {% endif %}
+    {% endif %}
+
+    <div class="image">
+        {% if event.image %}
+            <a href="{{ event.get_absolute_url }}">
+                <img src="{{ event.eventimage.get_100_100_url }}" alt="{{ event.title }}" />
+            </a>
+        {% else %}
+             <a href="{% url event event.slug %}">
+                {% if event.is_invitation %}
+                    <img src="/site_media/img/default_invitation.jpg" alt="" />
+                {% else %}
+                    <img src="/site_media/img/default_event.jpg" alt="" />
+                {% endif %}
+            </a>
+        {% endif %}
+    </div>
+   
+    <div class="infoblock">
+         <div class="preview-links-right event-listing">
+            <div class="menu-item-listing" style="margin-top: 17px;">
+                {% load comments %}
+                {% get_comment_count for event as commentcount  %}
+        
+                {% if commentcount %}
+                    <div onclick="window.location = '{% url event event.slug %}#comments'" class="recommendation-badge">
+                    </div>
+                    <a href="{% url event event.slug %}#comments">Kommentare</a>
+                {% else %}
+                    <div onclick="window.location = '{% url event event.slug %}#comments'" class="recommendation-badge-grey">
+                    </div>
+                    <a href="{% url event event.slug %}#comments">Kommentare</a>
+                {% endif %}
+            </div>
+            <div class="menu-item-listing">
+                <div onclick="" class="addthis_button weitersagen-badge" addthis:url="http://einfachleben.com{% url event event.slug %}">
+                </div>
+                <a href="http://addthis.com/bookmark.php" class="addthis_button" addthis:url="http://einfachleben.com{% url event event.slug %}">Weitersagen</a>
+            </div>
+        </div>
+        <h2 class="event-title-list"><a href="{{ event.get_absolute_url }}"><nobr>{{event.title|truncatewords:6}}</nobr></a></h2>
+        <span class="text">
+            {{event.body|truncatewords:15}}
+        </span>
+        <span class="info">
+            {% if event.is_single_day %}
+                <b>{{event.start_date|date:"l, d. m,"}} {{event.start_date|time}}</b> <br />
+            {% else %}
+                <b>{{event.start_date|date:"D, d. m,"}} {{event.start_date|time}} - {{event.end_date|date:"D, d. m,"}} {{event.end_date|time}}</b> <br />
+            {% endif %}
+            {% if event.location %}
+                <b>Wo?</b> <a href="{{event.location.get_absolute_url}}">{{event.location}}</a>     <br />
+            {% else %}
+                {% if event.location_name or event.location_adress %}
+                    <b>Wo?</b>
+                    {% if event.location_name %}{{event.location_name}}{% else %}{{event.location_adress}}{% endif %}<br />
+                {% endif %}
+            {% endif %}
+            
+            {% ifnotequal event.location event.author.get_profile %}
+                <b>Wer?</b> <a href="{{event.author.get_absolute_url}}">{{event.author.get_profile}}</a>
+            {% endifnotequal %}
+        </span>
+    </div>
+</div>
+

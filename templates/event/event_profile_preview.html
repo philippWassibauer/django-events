@@ -1,0 +1,62 @@
+{% load recommendation_tags %}
+<div class="main-list-item">
+     {% if event.is_invitation %}
+        {% if not event.has_free_invites %}
+            <div class="vergeben-band"></div>
+        {% endif %}
+    {% endif %}
+    <div class="image">
+        {% if event.image %}
+            <a href="{% url event event.slug %}">
+                <img src="{{ event.eventimage.get_100_100_url }}" alt="{{ event.title }}" />
+            </a>
+        {% else %}
+            <a href="{% url event event.slug %}">
+                {% if event.is_invitation %}
+                    <img src="/site_media/img/default_invitation.jpg" alt="" />
+                {% else %}
+                    <img src="/site_media/img/default_event.jpg" alt="" />
+                {% endif %}
+            </a>
+        {% endif %}
+    </div>
+    <div style="float:left;">
+        <h2 class="event-title-list"><a href="{{ event.get_absolute_url }}"><nobr>{{event.title}}</nobr></a></h2>
+        <span class="text" style="width: 320px;">
+            <div class="description">
+                {{event.body|truncatewords:15}}
+            </div>
+            <span class="event-date">
+                {% if event.is_single_day %}
+                    <b>Am:</b> {{event.start_date|date}}, {{event.start_date|time}}
+                {% else %}
+                    <b>Von:</b> {{event.start_date|date}}, {{event.start_date|time}} -
+                    <b>Bis:</b> {{event.end_date|date}}, {{event.end_date|time}} 
+                {% endif %}
+                {% if event.location %}
+                    <b> Wo?</b> <a href="{{event.location.get_absolute_url}}">{{event.location}}</a>     <br />
+                {% else %}
+                    {% if event.location_name or event.location_adress %}
+                        <b>Wo?</b>
+                        {% if event.location_name %}{{event.location_name}}{% else %}{{event.location_adress}}{% endif %}<br />
+                    {% endif %}
+                {% endif %}
+            </span>
+        </span>
+        <span class="info">
+            {% ifequal user event.author %}
+                <span class="form_next"><a href="{% url event_edit event.id %}">Editieren</a></span>
+                {% if event.is_invitation %}
+                    <span class="form_next"><a href="{% url invitation_new %}?template_event_id={{event.id}}">Als Vorlage verwenden</a></span>
+                {% else %}
+                    <span class="form_next"><a href="{% url event_new %}?template_event_id={{event.id}}">Als Vorlage verwenden</a></span>
+                {% endif %}
+                <span class="form_next"><a href="{% url event_destroy event.id %}">Löschen</a></span>
+            {% else %}
+                <div class="menu-item-listing" style="margin-top: 15px; float: right;">
+                    {% show_recommendations_badge event user 'Empfehlungen' %}
+                </div>
+            {% endifequal %}
+        </span>
+    </div>
+</div>

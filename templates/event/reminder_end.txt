@@ -1,0 +1,8 @@
+Sie haben über Einfachleben.com die Einladung {{event}} von Gastgeber {{event.location.get_profile}} genossen.
+Wir hoffen es hat Ihnen gefallen. Um diesen Gastgeber auf Einfachleben.com weiter zu empfehlen, folgen Sie bitte diesem Link:
+
+{{site_url}}{{event.get_absolute_url}}#recommendDialog
+
+Vielen Dank,
+
+Das EinfachLeben Team

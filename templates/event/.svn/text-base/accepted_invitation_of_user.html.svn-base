@@ -1,0 +1,17 @@
+{% load event_tags %}
+{% if accepted_events %}
+        {% for event in accepted_events %}
+            <div >
+                {{ event.render_inline }} -
+                {% if event.is_single_day %}
+                    <b>Am:</b> {{event.start_date|date}}
+                {% else %}
+                    <b>Von:</b> {{event.start_date|date}} -
+                    <b>Bis:</b> {{event.end_date|date}}
+                {% endif %}
+                 {% if not event.has_ended %} - <a href="{% url cancel_invitation event.id %}">Kann doch nicht kommen.</a> {% endif %}
+            </div>
+        {% endfor %}
+{% else %}
+    <p>Keine angenommenen Einladungen gefunden.</p>
+{% endif %}

@@ -1,0 +1,77 @@
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/svn/einfach-leben/!svn/ver/1563/einfachleben/trunk/apps/event/templates/event
+END
+start_screen.html
+K 25
+svn:wc:ra_dav:version-url
+V 96
+/svn/einfach-leben/!svn/ver/1476/einfachleben/trunk/apps/event/templates/event/start_screen.html
+END
+render_inline_big.html
+K 25
+svn:wc:ra_dav:version-url
+V 101
+/svn/einfach-leben/!svn/ver/1540/einfachleben/trunk/apps/event/templates/event/render_inline_big.html
+END
+event.html
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/svn/einfach-leben/!svn/ver/1382/einfachleben/trunk/apps/event/templates/event/event.html
+END
+event_preview.html
+K 25
+svn:wc:ra_dav:version-url
+V 97
+/svn/einfach-leben/!svn/ver/1606/einfachleben/trunk/apps/event/templates/event/event_preview.html
+END
+event_profile_preview.html
+K 25
+svn:wc:ra_dav:version-url
+V 105
+/svn/einfach-leben/!svn/ver/1563/einfachleben/trunk/apps/event/templates/event/event_profile_preview.html
+END
+old_events_of_user.html
+K 25
+svn:wc:ra_dav:version-url
+V 102
+/svn/einfach-leben/!svn/ver/1382/einfachleben/trunk/apps/event/templates/event/old_events_of_user.html
+END
+old_invitations_of_user.html
+K 25
+svn:wc:ra_dav:version-url
+V 107
+/svn/einfach-leben/!svn/ver/1382/einfachleben/trunk/apps/event/templates/event/old_invitations_of_user.html
+END
+current_events_of_user.html
+K 25
+svn:wc:ra_dav:version-url
+V 106
+/svn/einfach-leben/!svn/ver/1382/einfachleben/trunk/apps/event/templates/event/current_events_of_user.html
+END
+latest_accepted_events.html
+K 25
+svn:wc:ra_dav:version-url
+V 106
+/svn/einfach-leben/!svn/ver/1609/einfachleben/trunk/apps/event/templates/event/latest_accepted_events.html
+END
+event_calendar.html
+K 25
+svn:wc:ra_dav:version-url
+V 98
+/svn/einfach-leben/!svn/ver/1382/einfachleben/trunk/apps/event/templates/event/event_calendar.html
+END
+event_small_preview.html
+K 25
+svn:wc:ra_dav:version-url
+V 103
+/svn/einfach-leben/!svn/ver/1563/einfachleben/trunk/apps/event/templates/event/event_small_preview.html
+END
+current_invitations_of_user.html
+K 25
+svn:wc:ra_dav:version-url
+V 111
+/svn/einfach-leben/!svn/ver/1382/einfachleben/trunk/apps/event/templates/event/current_invitations_of_user.html
+END

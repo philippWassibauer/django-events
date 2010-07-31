@@ -1,0 +1,9 @@
+{% load truncchar_tag %}
+{% if event %}
+    {% if event.image %}
+        <a href="{{event.get_absolute_url}}">
+            <img src="{{event.eventimage.get_warum_main_icon_url}}" />
+        </a>
+    {% endif %}
+    <a href="{{event.get_absolute_url}}">{{event.title|truncchar:29}}</a>
+{% endif %}
