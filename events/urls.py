@@ -26,7 +26,7 @@ urlpatterns = patterns('event.views',
          'event_type':1,
          'template_name':'event/event_to_invitation.html'},
         name='event_to_invitation'),
-    )
+)
 
 urlpatterns += patterns('event.views',
     url(r'^einladung$', 'invitations', name="invitation_list_all"),
@@ -42,7 +42,7 @@ urlpatterns += patterns('event.views',
         kwargs={'form_class': InvitationForm, 'template_name': 'event/new_invitation.html', 'event_type': 1}, 
         name='invitation_new'),
     url(r'^einladung/annehmen/(?P<invitation_id>\d+)', 'accept_invitation', name='accept_invitation'),
-    )
+)
 
 urlpatterns  += patterns('event.views',
     url(r'^your_events/$', 'your_events', name='event_list_yours'),
@@ -50,5 +50,5 @@ urlpatterns  += patterns('event.views',
 
     url(r'^edit/(\d+)/$', 'edit', name='event_edit'),
     url(r'^destroy/(\d+)/$', 'destroy', name='event_destroy'),
-    )
+)
 

@@ -48,17 +48,21 @@ def events_month(request, year, month, event_type=0):
     if int(month) == datetime.datetime.now().month:
         events = events.filter(end_date__gte=datetime.datetime.now())
     else:
-        events = events.filter(end_date__gte=datetime.datetime(int(year), int(month), 1, 0, 0, 0))
+        events = events.filter(end_date__gte=datetime.datetime(int(year),
+                                                               int(month),
+                                                               1, 0, 0, 0))
 
     # invitations can be prestored, only display active ones   
     if event_type==1:
-        events = events.filter(invitations_start__lte=datetime.datetime.now(), invitations_deadline__gte=datetime.datetime.now())
+        events = events.filter(invitations_start__lte=datetime.datetime.now(),
+                               invitations_deadline__gte=datetime.datetime.now())
 
     # filter categories
     selected_category = None
     if request.GET.get("selected_category"):
         try:
-            selected_category = Category.objects.get(short_name=request.GET.get("selected_category"))
+            selected_category = Category.objects.get(\
+                                short_name=request.GET.get("selected_category"))
         except:
             selected_category = None
 
@@ -105,7 +109,9 @@ def events_month(request, year, month, event_type=0):
         event_location_ids = [event.location.id for event in page_events]
         
         pnt = fromstr("POINT("+str(lat)+" "+str(lng)+")", srid=4326)
-        profiles = Profile.objects.filter(id__in=event_location_ids).exclude(is_location=False).filter(location__distance_lte=(pnt, D(km=500)))
+        profiles = Profile.objects.filter(id__in=event_location_ids)\
+                        .exclude(is_location=False)\
+                        .filter(location__distance_lte=(pnt, D(km=500)))
         profiles = profiles.distance("POINT("+str(lat)+" "+str(lng)+")")
         profiles = profiles.order_by("distance")
         profiles = profiles.all()
@@ -161,8 +167,8 @@ def events_day(request, year, month, day, event_type=0):
     start_date = datetime.datetime(int(year), int(month), int(day), 0, 0)
     end_date = datetime.datetime(int(year), int(month), int(day), 23, 59)
     
-    events = Event.objects.filter(type__exact=event_type).filter(status__exact=2).filter(
-        (   Q(start_date__lte=end_date) & Q(end_date__gte=start_date))           )
+    events = Event.objects.filter(type__exact=event_type).filter(status__exact=2)\
+            .filter((Q(start_date__lte=end_date) & Q(end_date__gte=start_date)))
 
     template_name = "event/events_day_%s.html" % event_type
 
@@ -171,7 +177,8 @@ def events_day(request, year, month, day, event_type=0):
     selected_category = None
     if request.GET.get("selected_category"):
         try:
-            selected_category = Category.objects.get(short_name=request.GET.get("selected_category"))
+            selected_category = Category.objects.get(\
+                                short_name=request.GET.get("selected_category"))
         except:
             selected_category = None
 
@@ -179,7 +186,8 @@ def events_day(request, year, month, day, event_type=0):
         events = events.filter(author__profile__categories=selected_category)
 
     if event_type==1:
-        events = events.filter(invitations_start__lte=datetime.datetime.now(), invitations_deadline__gte=datetime.datetime.now())
+        events = events.filter(invitations_start__lte=datetime.datetime.now(),
+                               invitations_deadline__gte=datetime.datetime.now())
        
     events = events.order_by("end_date")
     
@@ -223,12 +231,15 @@ def destroy(request, id):
     user = request.user
     title = event.title
     if event.author != request.user:
-        request.user.message_set.create(message="You can't delete events that aren't yours")
+        request.user.message_set.create(message="You can't delete events \
+                                                    that aren't yours")
     else:
         event.delete()
-        request.user.message_set.create(message=_("Successfully deleted Event '%s'") % title)
+        request.user.message_set.create(message=_("Successfully deleted \
+                                                  Event '%s'") % title)
         
-    return HttpResponseRedirect(reverse("location_edit_events", kwargs={'username': user.username}))
+    return HttpResponseRedirect(reverse("location_edit_events",
+                                        kwargs={'username': user.username}))
 
 @user_passes_test(is_elevated_user)
 def new(request, event_id=None,
@@ -236,8 +247,6 @@ def new(request, event_id=None,
         template_name="event/new_event.html", 
         event_type=0):
     
-    trigger_names = [ { 'notification': 'event_new', 'activity': 'new_event' },
-                      { 'notification': 'invitation_new', 'activity':  'new_invitation' }]
     event = None
     
     if request.method == "POST":
@@ -246,7 +255,8 @@ def new(request, event_id=None,
             event = Event.objects.get(pk=event_id)
             event.pk = None
             event.id = None
-            event_form = form_class(request.user, request.POST, request.FILES, instance=event)
+            event_form = form_class(request.user, request.POST, request.FILES,
+                                    instance=event)
         if event_form.is_valid():
             event = event_form.save(commit=False)
             event.author = request.user
@@ -257,7 +267,8 @@ def new(request, event_id=None,
             event.slug = slugify(event.title)
 
             from misc.utils import make_unique
-            event.slug = make_unique(event.slug, lambda x: Event.objects.filter(slug__exact=x).count() == 0)
+            event.slug = make_unique(event.slug,
+                    lambda x: Event.objects.filter(slug__exact=x).count() == 0)
 
             if not event.image:
                 template_event_id = request.GET.get("template_event_id", False)
@@ -278,19 +289,15 @@ def new(request, event_id=None,
                     event.location_zip_code = request.POST.get("custom_location_zip_code")
                     event.location_country = request.POST.get("custom_location_country")
                 else:
-                    event_form.fields['location'].widget.errors = [u"Gastgeber muss angegeben werden"]
+                    event_form.fields['location'].widget.errors = \
+                                            [_(u"Venue has to be specified")]
                     return render_to_response(template_name, {
                         "event_form": event_form
                     }, context_instance=RequestContext(request))
             event.save()
             
-            if not event.is_invitation():
-                create_activity_item(trigger_names[event.type]['activity'], 
-                                     request.user, event)
-            else:
-                if event.is_invitation_active():
-                    create_activity_item("new_invitation", 
-                                     request.user, event)
+            
+
                     
             if notification:
                 notification.send([event.author], 
@@ -347,15 +354,18 @@ def edit(request, id, form_class=EventForm, template_name="event/edit.html"):
             if event_form.is_valid():
                 event = event_form.save(commit=False)
                 if not event.location:
-                    if request.POST.get("custom_location_name", False) and request.POST.get("custom_location_adress", False) and \
-                       request.POST.get("custom_location_zip_code", False) and request.POST.get("custom_location_city", False):
+                    if request.POST.get("custom_location_name", False) \
+                        and request.POST.get("custom_location_adress", False) \
+                        and request.POST.get("custom_location_zip_code", False) \
+                        and request.POST.get("custom_location_city", False):
                         event.location_name = request.POST.get("custom_location_name")
                         event.location_adress = request.POST.get("custom_location_adress")
                         event.location_city = request.POST.get("custom_location_city")
                         event.location_zip_code = request.POST.get("custom_location_zip_code")
                         event.location_country = request.POST.get("custom_location_country")
                 event.save()
-                return HttpResponseRedirect(reverse('location_edit_events', kwargs={'username': request.user.username}))
+                return HttpResponseRedirect(reverse('location_edit_events',
+                                    kwargs={'username': request.user.username}))
         else:
             event_form = form_class(request.user,instance=event)
     else:
@@ -367,61 +377,45 @@ def edit(request, id, form_class=EventForm, template_name="event/edit.html"):
     }, context_instance=RequestContext(request))
 
 @login_required
-def accept_invitation(request, invitation_id, template_name="event/accept_invitation.html"):
+def accept_invitation(request, invitation_id,
+                      template_name="event/accept_invitation.html"):
     event =  get_object_or_404(Event, id=invitation_id)
 
-    if event and event.author != request.user:
-        if not event.is_invitation_active():
-            return render_to_response("error.html", {
-                "text": u'Diese Einladung ist zur Zeit noch nicht freigeschalten und kann deswegen noch nicht angenommen werden',
-                "title": "Fehler",
-            }, context_instance=RequestContext(request))
-
-        if not request.user.get_profile().can_accept_invitation(event.author):
-            days_left = request.user.get_profile().days_to_next_invitation(event.author)
-            return render_to_response("error.html", {
-                "text": u'Sie haben in den letzten 3 Monaten bereits eine Einladung bei diesem Gastgeber angenommen. Sie können deshalb erst wieder in '+str(days_left)+' Tagen bei diesem Gastgeber eine Einladung annehmen',
-                "title": "Einladung kann nicht angenommen werden",
-            }, context_instance=RequestContext(request))
-
-        if not request.user.get_profile().is_cardholder() and not request.user.get_profile().is_location:
-            return HttpResponseRedirect(reverse('request_code') )
-            
-        if event.has_guest(request.user):
-            return render_to_response("error.html", {
-                "text": u'Sie sind bereits für diese Einladung angemeldet',
-                "title": "Fehler",
-            }, context_instance=RequestContext(request))
-
-        if not event.has_free_invites():
-            return render_to_response("error.html", {
-                "text": u'Es sind leider schon alle Einladungen vergeben',
-                "title": "Ausgebucht!",
-            }, context_instance=RequestContext(request))
-
-        event.guests.add(request.user)
-        event.save();
-        
-        request.user.get_profile().accept_invitation()
-        
-        if notification:
-            notification.send([request.user], "invitation_confirmed_user",
-                              {"event": event, "new_guest": request.user})
-            
-            notice_type = "invitation_confirmed"
-            if event.send_emails:
-                notice_type = "invitation_confirmed_email"
-            notification.send([event.author], notice_type,
-                              {"event": event, "new_guest": request.user})
-
-        return render_to_response(template_name, {
-            "event": event,
-        }, context_instance=RequestContext(request))
-    else:
+    if not event.is_invitation_active():
         return render_to_response("error.html", {
-            "text": u'Man darf keine eigenen Einladungen annehmen',
+            "text": _(u'This event is not yet active.'),
             "title": "Fehler",
         }, context_instance=RequestContext(request))
+        
+    if event.has_guest(request.user):
+        return render_to_response("error.html", {
+            "text": _(u'You are registered with this event already'),
+            "title": _(u"Error"),
+        }, context_instance=RequestContext(request))
+
+    if not event.has_free_invites():
+        return render_to_response("error.html", {
+            "text": _(u'This event has no more vacancy'),
+            "title": _("Full!"),
+        }, context_instance=RequestContext(request))
+
+    event.guests.add(request.user)
+    event.save();
+    
+    if notification:
+        notification.send([request.user], "invitation_confirmed_user",
+                          {"event": event, "new_guest": request.user})
+        
+        notice_type = "invitation_confirmed"
+        if event.send_emails:
+            notice_type = "invitation_confirmed_email"
+        notification.send([event.author], notice_type,
+                          {"event": event, "new_guest": request.user})
+
+    return render_to_response(template_name, {
+        "event": event,
+    }, context_instance=RequestContext(request))
+
 
 
 @login_required
