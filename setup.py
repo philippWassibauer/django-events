@@ -3,7 +3,7 @@ from distutils.core import setup
 setup(name='django-events',
       version="0.1",
       description='Events for django',
-      long_description=open('README.rst').read(),
+      long_description="Events for Django",
       author='Philipp Wassibauer',
       author_email='phil@maptales.com',
       url='http://github.com/philippWassibauer/django-events',
