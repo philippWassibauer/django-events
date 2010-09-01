@@ -1,5 +1,4 @@
 from django.db.models import signals
-from activity_stream.models import ActivityTypes
 from django.utils.translation import ugettext_noop as _
 
 try:
@@ -12,12 +11,7 @@ try:
             notification.create_notice_type("invitation_confirmed_email", _("Invitation confirmed"), _("A user has confirmed to accept your invitation."), default=2)
             notification.create_notice_type("invitation_confirmed", _("Invitation confirmed"), _("A user has confirmed to accept your invitation."), default=1)
             notification.create_notice_type("invitation_confirmed_user", _("You have confirmed an Invitation"), _("Information to this Invitation"), default=2)
-
             notification.create_notice_type("invitation_canceled", _("You canceled an Invitation"), _("You canceled an Invitation"), default=2)
-
-
-            ActivityTypes.objects.create(name="new_event")
-            ActivityTypes.objects.create(name="new_invitation")
         except:
             pass
 
