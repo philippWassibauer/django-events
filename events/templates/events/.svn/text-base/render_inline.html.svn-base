@@ -1,8 +1,0 @@
-{% if event.eventimage %}
-    <a href="{{event.get_absolute_url}}" class="profile-signature-image">
-       <img src="{{ event.eventimage.get_24_24_url }}" alt="{{ event }}" height="24px" width="24px"/>
-    </a>
-{% endif %}
-<a href="{{event.get_absolute_url}}" class="profile-signature-link">
-    {{event}}
-</a>

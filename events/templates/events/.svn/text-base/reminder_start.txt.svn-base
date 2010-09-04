@@ -1,8 +1,0 @@
-Erinnerung: Sie haben die Einladung {{event}} {% if event.is_single_day %} gültig am {{event.start_date|date}} ab {{event.start_date|time}} {% else %} gültig vom {{event.start_date|date}} ab {{event.start_date|time}} bis {{event.end_date|date}} um {{event.end_date|time}}{% endif %} von Gastgeber {{event.location.get_profile}} auf Einfachleben.com angenommen. 
-Der Gastgeber {{event.location.get_profile}} freut sich auf Ihren Besuch!
-
-Vielen Dank,
-
-Das EinfachLeben Team
-
-
