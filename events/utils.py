@@ -10,7 +10,7 @@ send_mail = get_send_mail()
 
 def send_reminder_mails(event,  
         subject_prefix=_(u'Erinnerung an Einladung: %(subject)s'),
-        template_name="event/reminder_start.txt"):
+        template_name="events/reminder_start.txt"):
     
     current_domain = Site.objects.get_current().domain
     subject = subject_prefix % {'subject': event.title}

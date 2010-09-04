@@ -9,11 +9,8 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.views.generic import date_based
 from django.conf import settings
 from django.db.models import Q
-from profiles.models import Category,Profile
-from geopy import geocoders
-from event.forms import EventForm, InvitationForm
-from event.models import Event
-from trumer.utils import is_elevated_user
+from forms import EventForm, InvitationForm
+from models import Event, EventCategory
 import datetime
 from datetime import timedelta
 from activity_stream.models import create_activity_item
@@ -41,7 +38,7 @@ def invitations(request):
     
 def events_month(request, year, month, event_type=0):
     size = request.GET.get('size', 10)
-    template_name = "event/events_month_%s.html" % event_type
+    template_name = "events/events_month_%s.html" % event_type
 
     events = Event.objects.filter(type__exact=event_type, status__exact=2)
 
@@ -61,7 +58,7 @@ def events_month(request, year, month, event_type=0):
     selected_category = None
     if request.GET.get("selected_category"):
         try:
-            selected_category = Category.objects.get(\
+            selected_category = EventCategory.objects.get(\
                                 short_name=request.GET.get("selected_category"))
         except:
             selected_category = None
@@ -85,7 +82,7 @@ def events_month(request, year, month, event_type=0):
         from django.contrib.gis.measure import D
         # get lat/lon for query
         from django.contrib.gis.geos import *
-
+        from geopy import geocoders
         g = geocoders.Google(settings.GOOGLE_MAPS_API_KEY)
         try:
             place, (lat, lng) = g.geocode(zip_code_or_adress+" salzburg austria")
@@ -131,7 +128,7 @@ def events_month(request, year, month, event_type=0):
                     else:
                         profile.current_events = [event]
         
-        template_name = "event/geo_result_%s.html" % event_type
+        template_name = "events/geo_result_%s.html" % event_type
         return render_to_response(template_name, {
             "zip_code_or_adress": zip_code_or_adress,
             'search_terms': search_terms,
@@ -145,7 +142,7 @@ def events_month(request, year, month, event_type=0):
             "selected_category": selected_category,
             'point_of_interest': point_of_interest,
             'GMAP': GoogleMap(),
-            'categories': Category.objects.filter(parent=None).all(),
+            'categories': EventCategory.objects.filter(parent=None).all(),
         }, context_instance=RequestContext(request))
     else:
         events = events.order_by("end_date")
@@ -160,7 +157,7 @@ def events_month(request, year, month, event_type=0):
         "month": int(month),
         "size": int(size),
         "selected_category": selected_category,
-        'categories': Category.objects.filter(parent=None).all(),
+        'categories': EventCategory.objects.filter(parent=None).all(),
     }, context_instance=RequestContext(request))
 
 def events_day(request, year, month, day, event_type=0):
@@ -170,14 +167,14 @@ def events_day(request, year, month, day, event_type=0):
     events = Event.objects.filter(type__exact=event_type).filter(status__exact=2)\
             .filter((Q(start_date__lte=end_date) & Q(end_date__gte=start_date)))
 
-    template_name = "event/events_day_%s.html" % event_type
+    template_name = "events/events_day_%s.html" % event_type
 
     size = request.GET.get('size', 10)
 
     selected_category = None
     if request.GET.get("selected_category"):
         try:
-            selected_category = Category.objects.get(\
+            selected_category = EventCategory.objects.get(\
                                 short_name=request.GET.get("selected_category"))
         except:
             selected_category = None
@@ -200,11 +197,11 @@ def events_day(request, year, month, day, event_type=0):
         "day": int(day),
         "size": int(size),
         "selected_category": selected_category,
-        'categories': Category.objects.filter(parent=None).all(),
+        'categories': EventCategory.objects.filter(parent=None).all(),
     }, context_instance=RequestContext(request))
 
 def event(request, slug,
-         template_name="event/event.html"):
+         template_name="events/event.html"):
     event = get_object_or_404(Event, slug=slug)
     if not event:
         raise Http404
@@ -219,13 +216,12 @@ def event(request, slug,
         "user_is_attending":user_is_attending, 
     }, context_instance=RequestContext(request))
 
-def your_events(request, template_name="event/your_events.html"):
+def your_events(request, template_name="events/your_events.html"):
     return render_to_response(template_name, {
         "events": Event.objects.filter(author=request.user),
     }, context_instance=RequestContext(request))
 your_events = login_required(your_events)
 
-@user_passes_test(is_elevated_user)
 def destroy(request, id):
     event = get_object_or_404(Event, id=id)
     user = request.user
@@ -241,10 +237,10 @@ def destroy(request, id):
     return HttpResponseRedirect(reverse("location_edit_events",
                                         kwargs={'username': user.username}))
 
-@user_passes_test(is_elevated_user)
+
 def new(request, event_id=None,
         form_class=EventForm, 
-        template_name="event/new_event.html", 
+        template_name="events/new_event.html", 
         event_type=0):
     
     event = None
@@ -331,15 +327,13 @@ def new(request, event_id=None,
     }, context_instance=RequestContext(request))
 
 
-@user_passes_test(is_elevated_user)
-def event_created(request, event_id, template_name="event/event_created.html"):
+def event_created(request, event_id, template_name="events/event_created.html"):
     event =  Event.objects.get(pk=event_id)
     return render_to_response(template_name, {
         "event": event,
     }, context_instance=RequestContext(request))
 
-@user_passes_test(is_elevated_user)
-def edit(request, id, form_class=EventForm, template_name="event/edit.html"):
+def edit(request, id, form_class=EventForm, template_name="events/edit.html"):
     event = get_object_or_404(Event, id=id)
     
     if event.is_invitation():
@@ -378,7 +372,7 @@ def edit(request, id, form_class=EventForm, template_name="event/edit.html"):
 
 @login_required
 def accept_invitation(request, invitation_id,
-                      template_name="event/accept_invitation.html"):
+                      template_name="events/accept_invitation.html"):
     event =  get_object_or_404(Event, id=invitation_id)
 
     if not event.is_invitation_active():
@@ -419,7 +413,7 @@ def accept_invitation(request, invitation_id,
 
 
 @login_required
-def cancel_invitation(request, invitation_id, template_name="event/remove_invitation.html"):
+def cancel_invitation(request, invitation_id, template_name="events/remove_invitation.html"):
     event =  get_object_or_404(Event, id=invitation_id)
     if request.method == "POST":
         if event.has_guest(request.user):
@@ -440,7 +434,7 @@ def cancel_invitation(request, invitation_id, template_name="event/remove_invita
         }, context_instance=RequestContext(request))
 
 
-def send_message_to_guests(request, invitation_id, template_name="event/"):
+def send_message_to_guests(request, invitation_id, template_name="events/"):
     from messages.views import compose, ComposeForm
     invitation = get_object_or_404(Event, id=invitation_id)
     recipients = ""
@@ -448,4 +442,4 @@ def send_message_to_guests(request, invitation_id, template_name="event/"):
         recipients += "+"+guest.username
         
     return compose(request, recipients, form_class=ComposeForm,
-        template_name='event/compose_to_guests.html', success_url=reverse("profile_detail", args=(request.user.username,)))
+        template_name='events/compose_to_guests.html', success_url=reverse("profile_detail", args=(request.user.username,)))

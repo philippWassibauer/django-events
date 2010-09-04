@@ -5,14 +5,14 @@ from django.utils.translation import ugettext_lazy as _
 from django.contrib.admin.widgets import AdminDateWidget, AdminTimeWidget, AdminSplitDateTime
 from django.template.loader import render_to_string
 
-from event.models import Event
+from models import Event
 from profiles.models import Profile
 
 from django import forms
 from django.conf import settings
 from django.utils.safestring import mark_safe
 from django.utils.text import truncate_words
-from widgets.widgets import AdvancedFileWidget
+from widgets import AdvancedFileWidget
 
 def is_startdate_before_enddate(start_date, end_date):
     if end_date <= start_date:
@@ -31,7 +31,7 @@ class InvitationTimeInput(forms.MultiWidget):
         forms.MultiWidget.__init__(self, widgets, attrs)
 
     def format_output(self, rendered_widgets):
-        return render_to_string("event/invitation_timeform.html", {
+        return render_to_string("events/invitation_timeform.html", {
             "only_on_date_widget": rendered_widgets[0],
             "only_on_time_widget": rendered_widgets[1],
             "start_date_widget": rendered_widgets[2],
@@ -120,8 +120,9 @@ class EventForm(forms.ModelForm):
         model = Event
         exclude = ('location_name', 'location_adress', 'location_zip_code', 
                    'location_city', 'location_country', 'start_date', 'end_date', 
-                   'status', 'allow_comments', 'tease', 'guests', 'author', 
+                   'status', 'allow_comments', 'tease', 'guests', 'creator', 
                    'created_at', 'updated_at', 'publish', 'type', 'slug',
+                   'send_emails_to_owner', 'admin_content',
 
                    'num_invites', 'num_additional_persons_per_invite',
                    'has_to_reserve', 'send_emails',
@@ -279,14 +280,8 @@ class LocationInput(forms.HiddenInput):
         self.user = user
         self.event = event
         self.errors = []
-
-        if user.get_profile().is_location:
-            self.is_location = user.get_profile().is_location
-            self.location_id = user.get_profile().id
-        else:
-            self.is_location = False
-            self.location_id = None
-
+        self.location_id = -1
+        self.is_location = False
         super(LocationInput, self).__init__(*args, **kwargs)
 
     class Media:
@@ -306,7 +301,7 @@ class LocationInput(forms.HiddenInput):
         location_form = LocationForm().as_table()
         event_location_form = EventLocationForm()
 
-        output_string = render_to_string("event/location_select.html", {
+        output_string = render_to_string("events/location_select.html", {
             'errors': self.errors,
             'event': self.event,
             'location': location,

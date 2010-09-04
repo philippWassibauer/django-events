@@ -2,7 +2,7 @@
 from datetime import date, timedelta
 
 from django import template
-from event.models import Event # You need to change this if you like to add your own events to the calendar
+from events.models import Event # You need to change this if you like to add your own events to the calendar
 from django.db.models import Q
 from django.template import Library, Node, TemplateSyntaxError, TemplateDoesNotExist
 from native_tags.decorators import function, comparison, filter
@@ -22,7 +22,7 @@ def get_last_day_of_month(year, month):
         month += 1
     return date(year, month, 1) - timedelta(1)
 
-def get_users_last_accepted_events(user, count=3, template_name="event/latest_accepted_events.html"):
+def get_users_last_accepted_events(user, count=3, template_name="events/latest_accepted_events.html"):
     accepted_events = Event.objects.filter(guests=user).order_by('-end_date')[0:count]
     return render_to_string(template_name, {"events": accepted_events})
 get_users_last_accepted_events = function(get_users_last_accepted_events)
@@ -89,13 +89,13 @@ def month_cal(year, month, calendar_type="invitations", current_day=None):
             'previous_month':previous_month,
             'previous_year': previous_year, 'calendar_type':calendar_type}
 
-register.inclusion_tag('event/event_calendar.html')(month_cal)
+register.inclusion_tag('events/event_calendar.html')(month_cal)
 
 
 def accepted_invitation_of_user(user):
     accepted_events = Event.objects.filter(guests=user, type=1).order_by('-start_date')
     return {'accepted_events':accepted_events, "user":user}
-register.inclusion_tag('event/accepted_invitation_of_user.html')(accepted_invitation_of_user)
+register.inclusion_tag('events/accepted_invitation_of_user.html')(accepted_invitation_of_user)
 
 
 def current_events_of_user(user, viewing_user, in_profile=False):
@@ -105,7 +105,7 @@ def current_events_of_user(user, viewing_user, in_profile=False):
     return {'current_events':current_events,
             "user":viewing_user,
             "in_profile": in_profile}
-register.inclusion_tag('event/current_events_of_user.html')(current_events_of_user)
+register.inclusion_tag('events/current_events_of_user.html')(current_events_of_user)
 
 def old_events_of_user(user, viewing_user, in_profile=False):
     old_events = Event.objects.filter(author=user, type=0, \
@@ -113,7 +113,7 @@ def old_events_of_user(user, viewing_user, in_profile=False):
                               .order_by("end_date")
     return {'old_events':old_events, "user":viewing_user,
             "in_profile": in_profile}
-register.inclusion_tag('event/old_events_of_user.html')(old_events_of_user)
+register.inclusion_tag('events/old_events_of_user.html')(old_events_of_user)
 
 def upcoming_invitations_of_user(user, viewing_user, in_profile=False):
     current_events = Event.objects.filter(author=user, type=1, \
@@ -122,7 +122,7 @@ def upcoming_invitations_of_user(user, viewing_user, in_profile=False):
                         .order_by("end_date")
     return {'current_invitations':current_events,
             "user":viewing_user, "in_profile": in_profile}
-register.inclusion_tag('event/upcoming_invitations_of_user.html')(upcoming_invitations_of_user)
+register.inclusion_tag('events/upcoming_invitations_of_user.html')(upcoming_invitations_of_user)
 
 def current_invitations_of_user(user, viewing_user, in_profile=False):
     if in_profile:
@@ -139,30 +139,30 @@ def current_invitations_of_user(user, viewing_user, in_profile=False):
                                       .order_by("end_date")
     return {'current_invitations':current_events, "user":viewing_user,
             "in_profile": in_profile}
-register.inclusion_tag('event/current_invitations_of_user.html')(current_invitations_of_user)
+register.inclusion_tag('events/current_invitations_of_user.html')(current_invitations_of_user)
 
 def old_invitations_of_user(user, viewing_user, in_profile=False):
     old_events = Event.objects.filter(author=user, type=1, end_date__lte=datetime.datetime.now).order_by("end_date")
     return {'old_invitations':old_events, "user":viewing_user, "in_profile": in_profile}
-register.inclusion_tag('event/old_invitations_of_user.html')(old_invitations_of_user)
+register.inclusion_tag('events/old_invitations_of_user.html')(old_invitations_of_user)
 
 
 def event_profile_preview(event, user):
     return {'event':event, 'user':user}
-register.inclusion_tag('event/event_profile_preview.html')(event_profile_preview)
+register.inclusion_tag('events/event_profile_preview.html')(event_profile_preview)
 
 
 def event_preview(event, user):
     return {'event':event, 'user':user}
-register.inclusion_tag('event/event_preview.html')(event_preview)
+register.inclusion_tag('events/event_preview.html')(event_preview)
 
 
 def event_small_preview(event, user):
     return {'event':event, 'user':user}
-register.inclusion_tag('event/event_small_preview.html')(event_small_preview)
+register.inclusion_tag('events/event_small_preview.html')(event_small_preview)
 
 
-def get_current_event(template_name='event/start_screen.html'):
+def get_current_event(template_name='events/start_screen.html'):
     events = Event.objects.filter(type__exact=0, status__exact=2)
     now = datetime.datetime.now()
     in_2_weeks = now+timedelta(weeks=2)
@@ -180,7 +180,7 @@ def get_current_event(template_name='event/start_screen.html'):
 get_current_event = function(get_current_event)
 
 
-def get_current_invitation(template_name='event/start_screen.html'):
+def get_current_invitation(template_name='events/start_screen.html'):
     invitations = Event.objects.filter(type__exact=1, status__exact=2)
     now = datetime.datetime.now()
     in_2_weeks = now+timedelta(weeks=2)

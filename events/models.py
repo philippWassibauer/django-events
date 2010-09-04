@@ -145,11 +145,11 @@ class Event(models.Model):
             return None
             
     def render_inline(self):
-        return mark_safe(render_to_string('event/render_inline.html',
+        return mark_safe(render_to_string('events/render_inline.html',
                                           { 'event': self }))
 
     def render_inline_big(self):
-        return mark_safe(render_to_string('event/render_inline_big.html',
+        return mark_safe(render_to_string('events/render_inline_big.html',
                                           { 'event': self }))
 
     def is_creator(self, user):
@@ -162,15 +162,15 @@ class Event(models.Model):
         return False
     
     def rendered(self):
-        return mark_safe(render_to_string('event/event.html',
+        return mark_safe(render_to_string('events/event.html',
                                           { 'event':  self  }))
 
     def preview(self):
-        return mark_safe(render_to_string('event/event_preview.html',
+        return mark_safe(render_to_string('events/event_preview.html',
                                           { 'event': self  }))
 
     def profile_preview(self):
-        return mark_safe(render_to_string('event/event_profile_preview.html',
+        return mark_safe(render_to_string('events/event_profile_preview.html',
                                           { 'event': self  }))      
 
     def is_invitation(self):
@@ -220,11 +220,11 @@ class Event(models.Model):
         from event.utils import send_reminder_mails
         if self.status == 2 and self.is_invitation():
             if self.starts_tomorrow():
-                send_reminder_mails(self, template_name="event/reminder_start.txt")
+                send_reminder_mails(self, template_name="events/reminder_start.txt")
             if self.has_ended_yesterday():
                 send_reminder_mails(self, 
                                     subject_prefix=_(u'recommend visited event'),
-                                    template_name="event/reminder_end.txt")
+                                    template_name="events/reminder_end.txt")
     
     def save(self, force_insert=False, force_update=False):
         self.updated_at = datetime.datetime.now()

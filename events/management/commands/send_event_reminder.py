@@ -4,7 +4,7 @@ class Command(NoArgsCommand):
     help = "Prepares mails for all events that begin today to remind my guests."
 
     def handle_noargs(self, **options):
-        from event.models import Event
+        from events.models import Event
         for event in Event.objects.filter(status__exact=2):
             print "collecting mails for event (%(id)s): %(title)s" % {'id': event.id, 'title':event.title}
             event.remind_my_users()
