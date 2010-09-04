@@ -13,7 +13,6 @@ from forms import EventForm, InvitationForm
 from models import Event, EventCategory
 import datetime
 from datetime import timedelta
-from activity_stream.models import create_activity_item
 from django.contrib.gis.maps.google.gmap import GoogleMap
 
 if "notification" in settings.INSTALLED_APPS:

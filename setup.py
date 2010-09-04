@@ -1,7 +1,7 @@
 from distutils.core import setup
 
 setup(name='django-events',
-      version="0.1.1",
+      version="0.1.2",
       description='Events for django',
       long_description="Events for Django",
       author='Philipp Wassibauer',
