@@ -20,7 +20,6 @@ if "notification" in settings.INSTALLED_APPS:
 else:
     notification = None
 
-
 def events(request):
     current_month = datetime.datetime.now().month
     current_year = datetime.datetime.now().year
@@ -35,11 +34,9 @@ def invitations(request):
                                                  kwargs={ 'year': current_year,
                                                           'month': current_month }))
     
-def events_month(request, year, month, event_type=0):
+def events_month(request, year, month, template_name="events/events_month.html"):
     size = request.GET.get('size', 10)
-    template_name = "events/events_month_%s.html" % event_type
-
-    events = Event.objects.filter(type__exact=event_type, status__exact=2)
+    events = Event.objects.filter(status__exact=2)
 
     if int(month) == datetime.datetime.now().month:
         events = events.filter(end_date__gte=datetime.datetime.now())
@@ -48,11 +45,7 @@ def events_month(request, year, month, event_type=0):
                                                                int(month),
                                                                1, 0, 0, 0))
 
-    # invitations can be prestored, only display active ones   
-    if event_type==1:
-        events = events.filter(invitations_start__lte=datetime.datetime.now(),
-                               invitations_deadline__gte=datetime.datetime.now())
-
+    
     # filter categories
     selected_category = None
     if request.GET.get("selected_category"):
@@ -80,7 +73,7 @@ def events_month(request, year, month, event_type=0):
     if zip_code_or_adress or display_map:
         from django.contrib.gis.measure import D
         # get lat/lon for query
-        from django.contrib.gis.geos import *
+        #from django.contrib.gis.geos import *
         from geopy import geocoders
         g = geocoders.Google(settings.GOOGLE_MAPS_API_KEY)
         try:
@@ -127,11 +120,9 @@ def events_month(request, year, month, event_type=0):
                     else:
                         profile.current_events = [event]
         
-        template_name = "events/geo_result_%s.html" % event_type
         return render_to_response(template_name, {
             "zip_code_or_adress": zip_code_or_adress,
             'search_terms': search_terms,
-            "event_type": event_type,
             "events":events.distinct(),
             "profiles": profiles,
             "current_date": datetime.date(int(year),int(month), 1),
@@ -141,7 +132,7 @@ def events_month(request, year, month, event_type=0):
             "selected_category": selected_category,
             'point_of_interest': point_of_interest,
             'GMAP': GoogleMap(),
-            'categories': EventCategory.objects.filter(parent=None).all(),
+            'categories': EventCategory.objects.all(),
         }, context_instance=RequestContext(request))
     else:
         events = events.order_by("end_date")
@@ -149,24 +140,23 @@ def events_month(request, year, month, event_type=0):
     return render_to_response(template_name, {
         "zip_code_or_adress": zip_code_or_adress,
         'search_terms': search_terms,
-        "event_type": event_type,
         "events":events.distinct(),
         "current_date": datetime.date(int(year),int(month), 1),
         "year": int(year),
         "month": int(month),
         "size": int(size),
         "selected_category": selected_category,
-        'categories': EventCategory.objects.filter(parent=None).all(),
+        'categories': EventCategory.objects.all(),
     }, context_instance=RequestContext(request))
 
-def events_day(request, year, month, day, event_type=0):
+def events_day(request, year, month, day):
     start_date = datetime.datetime(int(year), int(month), int(day), 0, 0)
     end_date = datetime.datetime(int(year), int(month), int(day), 23, 59)
     
-    events = Event.objects.filter(type__exact=event_type).filter(status__exact=2)\
+    events = Event.objects.filter(status__exact=2)\
             .filter((Q(start_date__lte=end_date) & Q(end_date__gte=start_date)))
 
-    template_name = "events/events_day_%s.html" % event_type
+    template_name = "events/events_day.html"
 
     size = request.GET.get('size', 10)
 
@@ -181,14 +171,10 @@ def events_day(request, year, month, day, event_type=0):
     if selected_category:
         events = events.filter(author__profile__categories=selected_category)
 
-    if event_type==1:
-        events = events.filter(invitations_start__lte=datetime.datetime.now(),
-                               invitations_deadline__gte=datetime.datetime.now())
-       
+    
     events = events.order_by("end_date")
     
     return render_to_response(template_name, {
-        "event_type": event_type,
         "events":events.distinct(),
         "current_date": datetime.date(int(year),int(month), int(day)),
         "year": int(year),
@@ -196,7 +182,7 @@ def events_day(request, year, month, day, event_type=0):
         "day": int(day),
         "size": int(size),
         "selected_category": selected_category,
-        'categories': EventCategory.objects.filter(parent=None).all(),
+        'categories': EventCategory.objects.all(),
     }, context_instance=RequestContext(request))
 
 def event(request, slug,
@@ -239,8 +225,7 @@ def destroy(request, id):
 
 def new(request, event_id=None,
         form_class=EventForm, 
-        template_name="events/new_event.html", 
-        event_type=0):
+        template_name="events/new_event.html"):
     
     event = None
     
@@ -255,9 +240,7 @@ def new(request, event_id=None,
         if event_form.is_valid():
             event = event_form.save(commit=False)
             event.author = request.user
-            if event_type:
-                event.type = event_type
-
+            
             from django.template.defaultfilters import slugify
             event.slug = slugify(event.title)
 
